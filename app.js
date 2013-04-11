@@ -75,7 +75,7 @@ app.get('/wheelers', function(req, res){
           var date = new Date();
           var weekday = date.getDay();
           var hours = date.getHours();
-          if(hours > 13) {
+          if(hours > 11) {
             weekday++;
           }
           switch(weekday) {
