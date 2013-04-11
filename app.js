@@ -74,6 +74,10 @@ app.get('/wheelers', function(req, res){
           var todaysMenu = [];
           var date = new Date();
           var weekday = date.getDay();
+          var hours = date.getHours();
+          if(hours > 13) {
+            weekday++;
+          }
           switch(weekday) {
             case 0: //sunday
             case 1: //monday
