@@ -70,7 +70,32 @@ app.get('/wheelers', function(req, res){
               }
             }
           }
-          res.send(parsedMenu);
+          
+          var todaysMenu = [];
+          var date = new Date();
+          var weekday = date.getDay();
+          switch(weekday) {
+            case 0: //sunday
+            case 1: //monday
+            case 6: //saturday
+              todaysMenu = parsedMenu[0];
+              break;
+            case 2: //tuesday
+            case 3: //wednesday
+            case 4: //thursday
+            case 5: //friday
+              todaysMenu = parsedMenu[weekday - 1];
+              break;
+          }
+          
+          var out = '<table id="wheelers">';
+          for(i = 0; i<todaysMenu.length; i++) {
+            out += '<tr><td>' + todaysMenu[i] + '</td></tr>';
+          }
+          out += '</table>';
+                        
+          
+          res.send(out);
         }
       }, {verbose: false});
       var parser = new htmlparser.Parser(handler);
