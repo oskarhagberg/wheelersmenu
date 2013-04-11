@@ -5,7 +5,10 @@
 
 var express = require('express')
   , routes = require('./routes')
-  , http = require('http');
+  , http = require('http')
+  , request = require('request')
+  , htmlparser = require('htmlparser')
+  , sys = require('sys');
 
 var app = express();
 
@@ -26,6 +29,59 @@ app.configure('development', function(){
 });
 
 app.get('/', routes.index);
+
+app.get('/wheelers', function(req, res){
+  
+  request({
+    uri: "http://extranet.sodexo.se/sv/Sites/Volvokoncernen/Utbud/Goteborg/Duetten/Matsedel-V47/?DateTime=2013-04-11",
+  }, function(error, response, body) {
+    if(error) {
+      res.send("error menu");
+    } else {
+      var handler = new htmlparser.DefaultHandler(function(err, dom){
+        if(err) {
+          res.send("error parsing menu");
+        } else {
+          
+          var menuTables = htmlparser.DomUtils.getElements({class: 'menu'}, dom);
+          var firstMenu = menuTables[0];
+          var rows = htmlparser.DomUtils.getElementsByTagName('tr', firstMenu);
+          
+          var parsedMenu = [];
+          var currentDay = [];
+          for(i = 0; i<rows.length; i++) {
+            
+            var row = rows[i];
+            
+            var headers = htmlparser.DomUtils.getElementsByTagName('th', row);
+            if(headers.length > 0) {
+
+              var header = htmlparser.DomUtils.getElementsByTagType('text', row);
+              if(header.length > 0) {
+                currentDay = [];
+                parsedMenu.push(currentDay);
+              }
+            } else {
+              var mealRows = htmlparser.DomUtils.getElements({class: 'mid'}, row);
+              var meals = htmlparser.DomUtils.getElementsByTagType('text', mealRows);
+              var meal = meals[0]['data'];
+              if(meal.indexOf('Komponera din egen sallad') === -1 && meal.indexOf('erbjuder..') === -1) {
+                currentDay.push(meal);
+              }
+            }
+          }
+          res.send(parsedMenu);
+        }
+      }, {verbose: false});
+      var parser = new htmlparser.Parser(handler);
+      parser.parseComplete(body);
+      
+    }
+    
+    
+  });
+
+});
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log("Express server listening on port " + app.get('port'));

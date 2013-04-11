@@ -7,6 +7,8 @@
   },
   "dependencies": {
     "express": "3.0.0beta4",
-    "jade": "*"
+    "jade": "*",
+    "htmlparser": "~1.7.6",
+    "request": "~2.16.6"
   }
 }
