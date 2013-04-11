@@ -65,7 +65,7 @@ app.get('/wheelers', function(req, res){
               var mealRows = htmlparser.DomUtils.getElements({class: 'mid'}, row);
               var meals = htmlparser.DomUtils.getElementsByTagType('text', mealRows);
               var meal = meals[0]['data'];
-              if(meal.indexOf('Komponera din egen sallad') === -1 && meal.indexOf('erbjuder..') === -1) {
+              if(meal.indexOf('Komponera din egen sallad') === -1 && meal.indexOf('erbjuder..') === -1 && meal.indexOf('Hamburgare med') === -1) {
                 currentDay.push(meal);
               }
             }
