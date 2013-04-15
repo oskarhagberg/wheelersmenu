@@ -32,8 +32,19 @@ app.get('/', routes.index);
 
 app.get('/wheelers', function(req, res){
   
+  var today = new Date();
+  var day = today.getDate();
+  var month = today.getMonth() + 1;
+  var year = today.getFullYear();
+  
+  var todayString = year + "-";
+  if(month < 10) { todayString += '0' };
+  todayString += month + "-";
+  if(day < 10) { todayString += '0' };
+  todayString += day + "";
+    
   request({
-    uri: "http://extranet.sodexo.se/sv/Sites/Volvokoncernen/Utbud/Goteborg/Duetten/Matsedel-V47/?DateTime=2013-04-11",
+    uri: "http://extranet.sodexo.se/sv/Sites/Volvokoncernen/Utbud/Goteborg/Duetten/Matsedel-V47/?DateTime=" + todayString,
   }, function(error, response, body) {
     if(error) {
       res.send("error menu");
@@ -46,7 +57,7 @@ app.get('/wheelers', function(req, res){
           var menuTables = htmlparser.DomUtils.getElements({class: 'menu'}, dom);
           var firstMenu = menuTables[0];
           var rows = htmlparser.DomUtils.getElementsByTagName('tr', firstMenu);
-          
+          console.log(rows);
           var parsedMenu = [];
           var currentDay = [];
           for(i = 0; i<rows.length; i++) {
@@ -67,6 +78,7 @@ app.get('/wheelers', function(req, res){
               var meal = meals[0]['data'];
               if(meal.indexOf('Komponera din egen sallad') === -1 && meal.indexOf('erbjuder..') === -1 && meal.indexOf('Hamburgare med') === -1) {
                 currentDay.push(meal);
+                console.log(i + " " + meal);
               }
             }
           }
@@ -90,6 +102,10 @@ app.get('/wheelers', function(req, res){
             case 5: //friday
               todaysMenu = parsedMenu[weekday - 1];
               break;
+          }
+          
+          if(todaysMenu === undefined) {
+            todaysMenu = ['No menu found for today'];
           }
           
           var out = '<table id="wheelers">';
