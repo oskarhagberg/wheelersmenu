@@ -30,7 +30,7 @@ app.configure('development', function(){
 
 app.get('/', routes.index);
 
-app.get('/wheelers', function(req, res){
+app.get('/:restaurant', function(req, res){
   
   var today = new Date();
   var day = today.getDate();
@@ -42,9 +42,21 @@ app.get('/wheelers', function(req, res){
   todayString += month + "-";
   if(day < 10) { todayString += '0' };
   todayString += day + "";
-    
+  
+  var restaurant = req.params.restaurant;
+  
+  if(restaurant === 'wheelers') {
+    var uri = "http://extranet.sodexo.se/sv/Sites/Volvokoncernen/Utbud/Goteborg/Duetten/Matsedel-V47/";
+  } else if(restaurant === 'gc') {
+    var uri = "http://extranet.sodexo.se/sv/Sites/Volvokoncernen/Utbud/Goteborg/PV-Hojden/Matsedlar/";
+  } else {
+    res.send(401, "Sorry, don't know that resturant. Maybe try 'wheelers' or 'gc'?");
+  }
+  
+  uri += "?DateTime=" + todayString;
+      
   request({
-    uri: "http://extranet.sodexo.se/sv/Sites/Volvokoncernen/Utbud/Goteborg/Duetten/Matsedel-V47/?DateTime=" + todayString,
+    uri: uri,
   }, function(error, response, body) {
     if(error) {
       res.send("error menu");
@@ -57,7 +69,6 @@ app.get('/wheelers', function(req, res){
           var menuTables = htmlparser.DomUtils.getElements({class: 'menu'}, dom);
           var firstMenu = menuTables[0];
           var rows = htmlparser.DomUtils.getElementsByTagName('tr', firstMenu);
-          console.log(rows);
           var parsedMenu = [];
           var currentDay = [];
           for(i = 0; i<rows.length; i++) {
@@ -78,7 +89,6 @@ app.get('/wheelers', function(req, res){
               var meal = meals[0]['data'];
               if(meal.indexOf('Komponera din egen sallad') === -1 && meal.indexOf('erbjuder..') === -1 && meal.indexOf('Hamburgare med') === -1) {
                 currentDay.push(meal);
-                console.log(i + " " + meal);
               }
             }
           }
